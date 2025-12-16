@@ -1,21 +1,161 @@
 # BioLeadIQ
 
-## 1) What problem does this solve?
-Produces a reproducible, explainable ranking of professionals most likely to adopt 3D in-vitro models, consolidating LinkedIn identity, PubMed intent, and funding signals into one scored sheet.
+**Reproducible Lead Intelligence for 3D In-Vitro Therapeutics**
 
-## 2) What data sources are used?
-- LinkedIn identification: `data/linkedin_profiles.csv` (name, title, company, location, LinkedIn URL). Demo uses manual CSV; Proxycurl/Apify could generate the same schema.
-- PubMed scientific intent: static fallback in `enrichment/pubmed_client.py` with optional live NCBI E-utilities lookup (disabled by default for reproducibility).
-- Funding data: `data/funding_data.json` (funding stage, last funding year), substitutable with Crunchbase API if desired.
+---
 
-## 3) How is the score calculated?
-Rule-based weight: `score = role_fit*30 + scientific_intent*40 + company_funding*20 + location_hub*10`, normalized to 0–100. Sub-scores are derived from title keywords, PubMed keyword hits (last 24 months emphasis), funding stage/recency, and whether the person sits in a biotech hub. Implemented in `scoring/scoring_rules.py`.
+## Overview
 
-## 4) How is the Google Sheet generated?
-Pipeline runs via `python main.py`. Results are always written to `output.csv`. If `GOOGLE_SHEETS_CREDS` (path to service account JSON) and `GOOGLE_SHEET_NAME` are set, `export/sheets_exporter.py` updates the first worksheet with the ranked table (sortable/filterable in Sheets).
+BioLeadIQ is a lightweight lead-intelligence system designed to help business development teams prioritize **who to speak to first** when selling or collaborating around **3D in-vitro models for therapeutic research**.
 
-## 5) What are the limitations?
-- Demo relies on static LinkedIn and funding samples; replace with real exports to broaden coverage.
-- PubMed live lookup is opt-in and rate-limited; default static mapping may drift from reality over time.
-- Funding stages are coarse and may miss round nuances; update the JSON or wire to Crunchbase for accuracy.
-- Location hub logic is heuristic (string contains known hubs); refine as needed for your go-to-market regions.
+Instead of collecting large volumes of unverified data, the system focuses on **explainable decision signals** and produces a **ranked, reproducible output** that can be inspected directly in a spreadsheet.
+
+The emphasis is on **clarity, reproducibility, and business relevance**, not automation for its own sake.
+
+---
+
+## What Problem Does This Solve?
+
+Business development teams often have access to many potential contacts but limited insight into:
+
+* Who is scientifically active in the relevant area
+* Who is likely to have budget
+* Who fits the right seniority and role
+
+BioLeadIQ consolidates **identity**, **scientific intent**, and **budget readiness** into a single, ranked view, allowing teams to prioritize outreach instead of manually triaging long contact lists.
+
+---
+
+## Design Principles
+
+This project was built with the following principles:
+
+* **Reproducibility over live scraping**
+* **Explainability over black-box scoring**
+* **Business signals over raw data volume**
+
+Every design decision in the system reflects these priorities.
+
+---
+
+## Data Sources and Why They Were Chosen
+
+### LinkedIn (Identification)
+
+For the demo, LinkedIn profile data is ingested from a static CSV (`data/linkedin_profiles.csv`) containing:
+
+* Name
+* Title
+* Company
+* Location
+* LinkedIn URL
+
+This approach ensures the demo is **easy to verify and reproduce**.
+In a production setup, the same schema could be populated via providers such as Proxycurl or Apify without changing the rest of the pipeline.
+
+---
+
+### PubMed (Scientific Intent)
+
+Scientific intent is inferred using publication signals from PubMed:
+
+* Recency of publications (last 24 months)
+* Presence of domain-specific keywords (e.g., toxicology, hepatic models, DILI)
+
+For reproducibility, the demo uses a **deterministic, cached mapping** inside `enrichment/pubmed_client.py`.
+An optional live PubMed lookup via NCBI E-utilities is supported but **disabled by default** to avoid network and rate-limit variability.
+
+This allows reviewers to see consistent results while still demonstrating how live enrichment would work.
+
+---
+
+### Funding Data (Budget Signal)
+
+Company funding data is sourced from a static JSON file (`data/funding_data.json`) containing:
+
+* Funding stage
+* Last funding year
+
+This captures a coarse but practical signal of budget readiness.
+The design intentionally keeps this layer simple; in production, it can be replaced with a Crunchbase or PitchBook integration.
+
+---
+
+## How the Scoring Works
+
+Each lead is assigned a **Propensity Score (0–100)** using a transparent, rule-based model:
+
+```
+score = role_fit * 30
+      + scientific_intent * 40
+      + company_funding * 20
+      + location_hub * 10
+```
+
+The weights reflect typical business priorities:
+
+* **Scientific activity** is the strongest indicator of near-term relevance
+* **Role seniority and fit** determine decision-making power
+* **Funding stage** indicates ability to purchase or adopt new tools
+* **Location** acts as a secondary signal for ecosystem maturity
+
+All scoring logic is implemented in `scoring/scoring_rules.py` and is fully inspectable.
+
+---
+
+## Output and Demo Artifact
+
+Running the pipeline via:
+
+```bash
+python main.py
+```
+
+always produces a ranked `output.csv`.
+
+If Google Sheets credentials are provided, the same results are also written to a Google Sheet, where they can be:
+
+* Sorted
+* Filtered
+* Reviewed without running code
+
+The Google Sheet is treated as the **primary demo artifact**, while the code remains the source of truth.
+
+---
+
+## Reproducibility and Tradeoffs
+
+This demo deliberately avoids:
+
+* Live LinkedIn scraping
+* Black-box ML or LLM scoring
+* Non-deterministic pipelines
+
+These choices ensure:
+
+* Results can be verified quickly
+* Reviewers can inspect logic without setup friction
+* The system remains easy to reason about
+
+The tradeoff is reduced data breadth, which is acceptable for a demo focused on **decision logic rather than scale**.
+
+---
+
+## Limitations and Extensions
+
+* LinkedIn and funding data are static samples; coverage depends on input quality
+* PubMed live lookup is optional and rate-limited
+* Funding stages are coarse and may miss nuance
+* Location hub detection is heuristic and region-specific
+
+These limitations are intentional for the demo and can be addressed in a production deployment.
+
+---
+
+## Summary
+
+BioLeadIQ demonstrates how a small, well-designed system can turn fragmented public signals into a **clear, ranked decision tool**.
+
+The goal is not to replace CRM systems or crawlers, but to show how **transparent logic and scientific context** can meaningfully improve lead prioritization.
+
+
