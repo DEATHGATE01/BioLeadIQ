@@ -2,8 +2,6 @@
 import tempfile
 from pathlib import Path
 
-import pandas as pd
-
 from main import format_for_output, read_linkedin_csv
 
 
