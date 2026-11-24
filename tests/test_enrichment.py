@@ -1,7 +1,6 @@
 """Tests for enrichment modules."""
-import pytest
-from pathlib import Path
 import tempfile
+from pathlib import Path
 
 from enrichment.funding_enricher import enrich_funding, load_funding
 
