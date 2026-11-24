@@ -1,5 +1,4 @@
 """Export results to Google Sheets and CSV."""
-import os
 from typing import Dict, List
 
 import gspread
