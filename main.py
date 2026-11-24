@@ -2,15 +2,15 @@
 import argparse
 import os
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 import pandas as pd
 from dotenv import load_dotenv
 
+from enrichment.funding_enricher import enrich_funding, load_funding
 from enrichment.pubmed_client import get_scientific_intent
-from enrichment.funding_enricher import load_funding, enrich_funding
-from scoring.scoring_rules import composite_score
 from export.sheets_exporter import export_to_csv, export_to_google_sheet
+from scoring.scoring_rules import composite_score
 
 load_dotenv()
 
@@ -25,8 +25,8 @@ def read_linkedin_csv(path: Path) -> List[Dict[str, object]]:
 def enrich_pubmed(profiles: List[Dict[str, object]]) -> List[Dict[str, object]]:
     for row in profiles:
         intent = get_scientific_intent(row.get("name", ""))
-        row.update(intent)
-        row["scientific_signal"] = "yes" if intent["keyword_hits"] > 0 else "no"
+        row.update({"keyword_hits": intent[0], "recent_publication": intent[1]})
+        row["scientific_signal"] = "yes" if intent[0] > 0 else "no"
     return profiles
 
 
