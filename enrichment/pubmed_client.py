@@ -5,7 +5,6 @@ are available. Defaults to a static lookup table to keep the
 pipeline reproducible without external dependencies.
 """
 import datetime
-import logging
 import os
 from typing import Dict, List, Tuple
 
