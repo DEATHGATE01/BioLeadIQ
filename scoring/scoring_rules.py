@@ -9,6 +9,7 @@ ROLE_KEYWORDS = [
     "vice president",
     "chief",
     "cso",
+    "ceo",
     "scientist",
 ]
 
