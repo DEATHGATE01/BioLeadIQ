@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Dict, List
 
 
-def load_funding(path: Path) -> Dict[str, Dict[str, object]]:
+def load_funding(path: Path | str) -> Dict[str, Dict[str, object]]:
+    path = Path(path)
     with path.open("r", encoding="utf-8") as fp:
         data = json.load(fp)
     return {row["company"].strip(): row for row in data}
