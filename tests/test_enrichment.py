@@ -1,19 +1,21 @@
 """Tests for enrichment modules."""
 import pytest
-from enrichment.funding_enricher import load_funding, enrich_funding
+from pathlib import Path
+import tempfile
+
+from enrichment.funding_enricher import enrich_funding, load_funding
 
 
-def test_load_funding_empty():
+def test_load_funding_empty() -> None:
     """Test loading funding data from empty file."""
-    import tempfile
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-        f.write('{}')
-        path = f.name
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        f.write("{}")
+        path = Path(f.name)
     result = load_funding(path)
     assert result == {}
 
 
-def test_enrich_funding_no_match():
+def test_enrich_funding_no_match() -> None:
     """Test funding enrichment with no matching company."""
     profiles = [{"company": "Unknown Corp"}]
     funding_map = {"Known Corp": {"stage": "Series B"}}
