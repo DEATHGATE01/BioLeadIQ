@@ -2,29 +2,26 @@
 import os
 from typing import List
 
-import pandas as pd
 import gspread
+import pandas as pd
 from google.oauth2.service_account import Credentials
 
 SCOPE = ["https://www.googleapis.com/auth/spreadsheets"]
 
 
-def _get_client(creds_path: str) -> gspread.Client:
+def export_to_sheets(
+    rows: List[Dict[str, object]], spreadsheet_id: str, creds_path: str
+) -> None:
     creds = Credentials.from_service_account_file(creds_path, scopes=SCOPE)
-    return gspread.authorize(creds)
+    client = gspread.authorize(creds)
+    sheet = client.open_by_key(spreadsheet_id).sheet1
+    sheet.clear()
+    if rows:
+        headers = list(rows[0].keys())
+        sheet.append_row(headers)
+        for row in rows:
+            sheet.append_row([row.get(h, "") for h in headers])
 
 
-def export_to_google_sheet(rows: List[dict], creds_path: str, sheet_name: str) -> str:
-    client = _get_client(creds_path)
-    sh = client.open(sheet_name)
-    worksheet = sh.sheet1
-    df = pd.DataFrame(rows)
-    worksheet.clear()
-    worksheet.update([df.columns.values.tolist()] + df.values.tolist())
-    return sh.url
-
-
-def export_to_csv(rows: List[dict], path: str) -> str:
-    df = pd.DataFrame(rows)
-    df.to_csv(path, index=False)
-    return os.path.abspath(path)
+def export_to_csv(rows: List[Dict[str, object]], path: str) -> None:
+    pd.DataFrame(rows).to_csv(path, index=False)
