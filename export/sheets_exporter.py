@@ -1,6 +1,6 @@
 """Export results to Google Sheets and CSV."""
 import os
-from typing import List
+from typing import Dict, List
 
 import gspread
 import pandas as pd
